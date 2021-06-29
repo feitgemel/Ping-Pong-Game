@@ -14,7 +14,8 @@ win = t.Screen()    # creating a window
 win.title("Ping-Pong Game") # Giving name to the game.
 win.bgcolor('black')    # providing color to the HomeScreen
 win.setup(width=800,height=600) # Size of the game panel 
-win.tracer(0)   # which speed up's the game.
+win.tracer(n=1)   # which speed up's the game.
+
 
 # Creating left paddle for the game
 
@@ -44,8 +45,8 @@ ball.shape('circle')
 ball.color('yellow')
 ball.penup()
 ball.goto(0,0)
-ball_dx = 1.5   # Setting up the pixels for the ball movement.
-ball_dy = 1.5
+ball_dx = 2   # Setting up the pixels for the ball movement.
+ball_dy = 2
 
 # Creating a pen for updating the Score
 
@@ -55,7 +56,7 @@ pen.color('skyblue')
 pen.penup()
 pen.hideturtle()
 pen.goto(0,260)
-pen.write("Player A: 0                    Player B: 0 ",align="center",font=('Monaco',24,"normal"))
+pen.write(" Player A: 0                   Player B: 0 ",align="center",font=('Monaco',24,"normal"))
 
 
 # Moving the left Paddle using the keyboard
@@ -89,8 +90,8 @@ def paddle_right_down():
 # Keyboard binding
 
 win.listen()
-win.onkeypress(paddle_left_up,"u")
-win.onkeypress(paddle_left_down,"e")
+win.onkeypress(paddle_left_up,"q")
+win.onkeypress(paddle_left_down,"a")
 win.onkeypress(paddle_right_up,"Up")
 win.onkeypress(paddle_right_down,"Down")
 
