@@ -39,6 +39,7 @@ F2 = 0x71
 
 A = 0x41
 Akey = 0x41
+Qkey = 0x51
 
 # C struct definitions
 

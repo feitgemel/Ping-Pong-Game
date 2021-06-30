@@ -7,7 +7,7 @@ import os
 import mediapipe as mp 
 import cv2
 
-from activateKeyboard import Akey
+from activateKeyboard import Akey, Qkey
 from activateKeyboard import PressKey, ReleaseKey  
 
 
@@ -112,7 +112,7 @@ win.onkeypress(paddle_right_down,"Down")
 
 # Main Game Loop
 
-with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.8) as pose:
 
     while cap.isOpened():
         
@@ -141,8 +141,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             rightCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].y * h)
             #cv2.circle(image, (rightCx,rightCy) , 15 , (255,0,255), -1 )
             
-            rightShoulderCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x * w)
-            rightShoulderCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].y * h)
+            rightHipCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].x * w)
+            rightHipCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].y * h)
 
             leftCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].x * w)
             leftCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].y * h)
@@ -150,30 +150,36 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             #cv2.circle(image, (leftCx,leftCy) , 15 , (255,0,255), -1 )
             #print(len(landmarks)) # always 33 points of the pose model
 
-            leftShoulderCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x * w)
-            leftShoulderCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y * h)
+            leftHipCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].x * w)
+            leftHipCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y * h)
+            cv2.circle(image, (leftHipCx,leftHipCy) , 15 , (255,0,255), -1 )
 
             noseCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].x * w)
             noseCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].y * h)
-            #cv2.circle(image, (noseCx,noseCy) , 15 , (255,0,255), -1 )
+            cv2.circle(image, (noseCx,noseCy) , 15 , (255,0,255), -1 )
 
             if leftCy <  noseCy :
                 messageText="Left Up"    
                 #cv2.rectangle(image, (20, 300), (270, 425), (255, 255, 0), cv2.FILLED)
                 cv2.putText(image, "Left Up", (leftCx, leftCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+                PressKey(Qkey) # press the U key
+                time.sleep(waitTimePressKey) 
+                ReleaseKey(Qkey) # press the U key
+                print(messageText)
 
-            if leftCy > leftShoulderCy :
+
+            if leftCy > leftHipCy :
                 messageText="Left Down"    
                 #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
-                cv2.putText(image, "Left Down", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+                cv2.putText(image, "Left Down", (leftCx,leftCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
                 PressKey(Akey) # press the A key
                 time.sleep(waitTimePressKey) 
                 ReleaseKey(Akey) # press the A key
 
-            if leftCy < leftShoulderCy and leftCy > noseCy:
-                messageText="Left body center"    
+            if leftCy < leftHipCy and leftCy > noseCy:
+                messageText="Left center"    
                 #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
-                cv2.putText(image, "Left body center", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+                cv2.putText(image, "Left center", (leftCx,leftCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
 
 
@@ -182,15 +188,15 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
                 cv2.putText(image, "Right Up", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
-            if rightCy > rightShoulderCy :
+            if rightCy > rightHipCy :
                 messageText="Right Down"    
                 #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
                 cv2.putText(image, "Right Down", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
-            if rightCy < rightShoulderCy and rightCy > noseCy:
-                messageText="Right body center"    
+            if rightCy < rightHipCy and rightCy > noseCy:
+                messageText="Right center"    
                 #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
-                cv2.putText(image, "Right body center", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+                cv2.putText(image, "Right center", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
 
         except: # if we cannot find any landmarks 
