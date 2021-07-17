@@ -1,11 +1,14 @@
 # Ping-Pong game with turtle module.
 # Done by Sri Manikanta Palakollu.
-# Version - 3.7.0
+# Forked and added MediaPipe functionality by Eran Feit
+# Version - 4.0.0
 
 import turtle as t
 import os
 import mediapipe as mp 
 import cv2
+import time
+import win32gui
 
 from activateKeyboard import Akey, Qkey
 from activateKeyboard import PressKey, ReleaseKey  
@@ -13,9 +16,9 @@ from activateKeyboard import PressKey, ReleaseKey
 
 mp_pose = mp.solutions.pose
 cap = cv2.VideoCapture(0)
-cap.set(3,640)
-cap.set(4,480)
-waitTimePressKey=0.2
+cap.set(3,1280)
+cap.set(4,720)
+waitTimePressKey=0.05
 
 # Score varibales
 
@@ -27,7 +30,6 @@ win.title("Ping-Pong Game") # Giving name to the game.
 win.bgcolor('black')    # providing color to the HomeScreen
 win.setup(width=800,height=600) # Size of the game panel 
 win.tracer(n=1)   # which speed up's the game.
-
 
 # Creating left paddle for the game
 
@@ -57,8 +59,8 @@ ball.shape('circle')
 ball.color('yellow')
 ball.penup()
 ball.goto(0,0)
-ball_dx = 2   # Setting up the pixels for the ball movement.
-ball_dy = 2
+ball_dx = 8   # Setting up the pixels for the ball movement. - This is the ball speed
+ball_dy = 8 
 
 # Creating a pen for updating the Score
 
@@ -75,28 +77,28 @@ pen.write(" Player A: 0                   Player B: 0 ",align="center",font=('Mo
 
 def paddle_left_up():
     y = paddle_left.ycor()
-    y = y + 15
+    y = y + 25
     paddle_left.sety(y)
 
 # Moving the left paddle down
 
 def paddle_left_down():
     y = paddle_left.ycor()
-    y = y - 15
+    y = y - 25
     paddle_left.sety(y)
 
 # Moving the right paddle up
 
 def paddle_right_up():
     y = paddle_right.ycor()
-    y = y + 15
+    y = y + 25
     paddle_right.sety(y)
 
 # Moving right paddle down
 
 def paddle_right_down():
     y = paddle_right.ycor()
-    y = y - 15
+    y = y - 25
     paddle_right.sety(y)
 
 # Keyboard binding
@@ -107,12 +109,11 @@ win.onkeypress(paddle_left_down,"a")
 win.onkeypress(paddle_right_up,"Up")
 win.onkeypress(paddle_right_down,"Down")
 
-
-
+hwnd = win32gui.FindWindow(None, "Ping-Pong Game") 
 
 # Main Game Loop
 
-with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.8) as pose:
+with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
 
     while cap.isOpened():
         
@@ -134,15 +135,18 @@ with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.8) as 
         try:
             # if we have a detection
             landmarks = results.pose_landmarks.landmark
+            win32gui.SetForegroundWindow(hwnd)
+            win32gui.BringWindowToTop(hwnd) 
+
             
             h , w , c = image.shape
             
-            rightCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].x * w)
-            rightCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].y * h)
+            #rightCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].x * w)
+            #rightCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_INDEX].y * h)
             #cv2.circle(image, (rightCx,rightCy) , 15 , (255,0,255), -1 )
             
-            rightHipCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].x * w)
-            rightHipCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].y * h)
+            #rightHipCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].x * w)
+            #rightHipCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].y * h)
 
             leftCx = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].x * w)
             leftCy = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_INDEX].y * h)
@@ -162,19 +166,19 @@ with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.8) as 
                 messageText="Left Up"    
                 #cv2.rectangle(image, (20, 300), (270, 425), (255, 255, 0), cv2.FILLED)
                 cv2.putText(image, "Left Up", (leftCx, leftCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
-                PressKey(Qkey) # press the U key
+                PressKey(Qkey) # press the q key
                 time.sleep(waitTimePressKey) 
-                ReleaseKey(Qkey) # press the U key
-                print(messageText)
+                ReleaseKey(Qkey) # press the q key
+                #print(messageText)
 
 
             if leftCy > leftHipCy :
                 messageText="Left Down"    
                 #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
                 cv2.putText(image, "Left Down", (leftCx,leftCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
-                PressKey(Akey) # press the A key
+                PressKey(Akey) # press the a key
                 time.sleep(waitTimePressKey) 
-                ReleaseKey(Akey) # press the A key
+                ReleaseKey(Akey) # press the a key
 
             if leftCy < leftHipCy and leftCy > noseCy:
                 messageText="Left center"    
@@ -183,20 +187,20 @@ with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.8) as 
 
 
 
-            if rightCy < noseCy :
-                messageText="Right Up"    
-                #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
-                cv2.putText(image, "Right Up", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+            # if rightCy < noseCy :
+            #     messageText="Right Up"    
+            #     #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
+            #     cv2.putText(image, "Right Up", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
-            if rightCy > rightHipCy :
-                messageText="Right Down"    
-                #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
-                cv2.putText(image, "Right Down", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+            # if rightCy > rightHipCy :
+            #     messageText="Right Down"    
+            #     #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
+            #     cv2.putText(image, "Right Down", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
-            if rightCy < rightHipCy and rightCy > noseCy:
-                messageText="Right center"    
-                #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
-                cv2.putText(image, "Right center", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
+            # if rightCy < rightHipCy and rightCy > noseCy:
+            #     messageText="Right center"    
+            #     #cv2.rectangle(image, (700, 300), (270, 425), (255, 255, 0), cv2.FILLED)
+            #     cv2.putText(image, "Right center", (rightCx,rightCy-50), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 5)
 
 
         except: # if we cannot find any landmarks 
@@ -205,9 +209,10 @@ with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.8) as 
         #mp_drwaing.draw_landmarks(image,results.pose_landmarks,mp_pose.POSE_CONNECTIONS)
         
         cv2.imshow('image',image)
+        cv2.moveWindow('image',0,0)
 
-
-        if cv2.waitKey(10) & 0xFF == ord('q'):
+        # exit with w key
+        if cv2.waitKey(10) & 0xFF == ord('w'):
             break
 
 
